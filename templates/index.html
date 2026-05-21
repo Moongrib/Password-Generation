@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🍄 Магический Генератор Паролей</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Фон -->
+  <div id="bg-layer"></div>
+  
+  <div class="container">
+    <div class="card">
+      <h1 class="title">🍄 Магический Генератор</h1>
+      
+      <div class="password-display" id="passwordDisplay">
+        <span class="placeholder">Нажмите "Создать пароль"</span>
+      </div>
+      
+      <div class="controls">
+        <div class="slider-container">
+          <label for="lengthSlider">Длина пароля: <span id="lengthValue">12</span></label>
+          <input type="range" id="lengthSlider" min="6" max="32" value="12">
+        </div>
+        
+        <div class="buttons">
+          <button id="generateBtn" class="btn btn-generate">
+            <span class="btn-icon">✨</span>
+            <span>Создать пароль</span>
+          </button>
+          
+          <button id="copyBtn" class="btn btn-copy" disabled>
+            <span class="btn-icon">📋</span>
+            <span>Копировать</span>
+          </button>
+        </div>
+      </div>
+      
+      <div class="quote">
+        <p>"Величие гриба не в том, как высоко он стоит, а в том, как глубоко он соединяет. Он не кричит о силе, а тихо превращает прах в жизнь, напоминая: истинное могущество растёт не к небу, а в тишине незримых связей."</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 🍄 Фоны (локальные картинки)
+    const backgrounds = [
+      "{{ url_for('static', filename='images/bg1.jpg') }}",
+      "{{ url_for('static', filename='images/bg2.jpg') }}",
+      "{{ url_for('static', filename='images/bg3.jpg') }}",
+      "{{ url_for('static', filename='images/bg4.jpg') }}",
+      "{{ url_for('static', filename='images/bg5.jpg') }}"
+    ];
+
+    let currentBgIndex = 0;
+    const passwordDisplay = document.getElementById('passwordDisplay');
+    const generateBtn = document.getElementById('generateBtn');
+    const copyBtn = document.getElementById('copyBtn');
+    const lengthSlider = document.getElementById('lengthSlider');
+    const lengthValue = document.getElementById('lengthValue');
+    const bgLayer = document.getElementById('bg-layer');
+
+    // Смена фона
+    function changeBackground() {
+      const url = backgrounds[currentBgIndex] + '?t=' + Date.now();
+      bgLayer.style.backgroundImage = `url('${url}')`;
+      currentBgIndex = (currentBgIndex + 1) % backgrounds.length;
+    }
+
+    // Обновление значения длины
+    lengthSlider.addEventListener('input', () => {
+      lengthValue.textContent = lengthSlider.value;
+    });
+
+    // Генерация пароля
+    generateBtn.addEventListener('click', async () => {
+      generateBtn.disabled = true;
+      generateBtn.innerHTML = '<span class="btn-icon">⏳</span><span>Создаю...</span>';
+      
+      try {
+        const res = await fetch('/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ length: parseInt(lengthSlider.value) })
+        });
+        
+        if (!res.ok) throw new Error('Ошибка сервера');
+        
+        const data = await res.json();
+        passwordDisplay.textContent = data.password;
+        passwordDisplay.classList.add('pop');
+        setTimeout(() => passwordDisplay.classList.remove('pop'), 400);
+        
+        copyBtn.disabled = false;
+        changeBackground();
+      } catch (err) {
+        passwordDisplay.innerHTML = '<span class="error">⚠️ Ошибка генерации</span>';
+        console.error(err);
+      } finally {
+        generateBtn.disabled = false;
+        generateBtn.innerHTML = '<span class="btn-icon">✨</span><span>Создать пароль</span>';
+      }
+    });
+
+    // Копирование в буфер
+    copyBtn.addEventListener('click', async () => {
+      const password = passwordDisplay.textContent;
+      if (password && password !== 'Нажмите "Создать пароль"') {
+        try {
+          await navigator.clipboard.writeText(password);
+          copyBtn.innerHTML = '<span class="btn-icon">✅</span><span>Скопировано!</span>';
+          setTimeout(() => {
+            copyBtn.innerHTML = '<span class="btn-icon">📋</span><span>Копировать</span>';
+          }, 2000);
+        } catch (err) {
+          // Fallback для старых браузеров
+          const textarea = document.createElement('textarea');
+          textarea.value = password;
+          document.body.appendChild(textarea);
+          textarea.select();
+          document.execCommand('copy');
+          document.body.removeChild(textarea);
+          copyBtn.innerHTML = '<span class="btn-icon">✅</span><span>Скопировано!</span>';
+          setTimeout(() => {
+            copyBtn.innerHTML = '<span class="btn-icon">📋</span><span>Копировать</span>';
+          }, 2000);
+        }
+      }
+    });
+
+    // Установить первый фон при загрузке
+    changeBackground();
+  </script>
+</body>
+</html>
