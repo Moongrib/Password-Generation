@@ -8,44 +8,103 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
 </head>
 <body>
-  <!-- Фон -->
   <div id="bg-layer"></div>
   
   <div class="container">
-    <div class="card">
-      <h1 class="title">🍄 Магический Генератор</h1>
+    <div class="layout-grid">
       
-      <div class="password-display" id="passwordDisplay">
-        <span class="placeholder">Нажмите "Создать пароль"</span>
-      </div>
-      
-      <div class="controls">
-        <div class="slider-container">
-          <label for="lengthSlider">Длина пароля: <span id="lengthValue">12</span></label>
-          <input type="range" id="lengthSlider" min="6" max="32" value="12">
+      <!-- ЛЕВАЯ КОЛОНКА: Генератор -->
+      <div class="card main-panel">
+        <h1 class="title">🍄 Магический Генератор</h1>
+        
+        <div class="password-display" id="passwordDisplay">
+          <span class="placeholder">Нажмите "Создать пароль"</span>
+        </div>
+
+        <div class="strength-container">
+          <div class="strength-bar-track">
+            <div class="strength-bar-fill" id="strengthBar"></div>
+          </div>
+          <span id="strengthText">Надёжность: —</span>
         </div>
         
-        <div class="buttons">
-          <button id="generateBtn" class="btn btn-generate">
-            <span class="btn-icon">✨</span>
-            <span>Создать пароль</span>
-          </button>
+        <div class="controls">
+          <div class="slider-container">
+            <label for="lengthSlider">Длина пароля: <span id="lengthValue">12</span></label>
+            <input type="range" id="lengthSlider" min="6" max="32" value="12">
+          </div>
+
+          <div class="filters">
+            <label class="checkbox-label"><input type="checkbox" id="chkUpper" checked> Заглавные (A-Z)</label>
+            <label class="checkbox-label"><input type="checkbox" id="chkLower" checked> Строчные (a-z)</label>
+            <label class="checkbox-label"><input type="checkbox" id="chkDigits" checked> Цифры (0-9)</label>
+            <label class="checkbox-label"><input type="checkbox" id="chkSpecial" checked> Спецсимволы (!@#)</label>
+            <label class="checkbox-label"><input type="checkbox" id="chkSimilar"> Исключить похожие (I,l,1,O,0)</label>
+          </div>
+
+          <div class="mode-toggle">
+            <label class="switch">
+              <input type="checkbox" id="pronounceableToggle">
+              <span class="slider"></span>
+            </label>
+            <span>✨ Произносимый режим</span>
+          </div>
+
+          <!-- Выбор типа произносимого пароля -->
+          <div class="pronounceable-options" id="pronounceableOptions" style="display:none;">
+            <label class="radio-label">
+              <input type="radio" name="pronounceableMode" value="wordlist" checked>
+              <span>📚 Слова (Moss-Crystal-42)</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="pronounceableMode" value="syllables">
+              <span>🎵 Слоги (Mushroom-Forest)</span>
+            </label>
+          </div>
           
-          <button id="copyBtn" class="btn btn-copy" disabled>
-            <span class="btn-icon">📋</span>
-            <span>Копировать</span>
-          </button>
+          <div class="buttons">
+            <button id="generateBtn" class="btn btn-generate">
+              <span class="btn-icon">🌱</span><span>Создать пароль</span>
+            </button>
+            <button id="copyBtn" class="btn btn-copy" disabled>
+              <span class="btn-icon">📋</span><span>Копировать</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="history-section">
+          <h3>📜 Последние создания магии</h3>
+          <ul id="historyList" class="history-list">
+            <li class="history-empty">История пуста</li>
+          </ul>
         </div>
       </div>
-      
-      <div class="quote">
-        <p>"Величие гриба не в том, как высоко он стоит, а в том, как глубоко он соединяет. Он не кричит о силе, а тихо превращает прах в жизнь, напоминая: истинное могущество растёт не к небу, а в тишине незримых связей."</p>
+
+      <!-- ПРАВАЯ КОЛОНКА: QR и Цитата -->
+      <div class="side-panel">
+        <div class="magic-panel qr-panel">
+          <h3 class="panel-title"> QR-портал</h3>
+          <p class="panel-desc">Сканируй для переноса на телефон</p>
+          <div id="qrContainer" class="qr-box">
+            <img id="qrImage" src="" alt="QR Code" style="display:none;">
+            <span id="qrPlaceholder">🍄 Здесь появится код</span>
+          </div>
+        </div>
+
+        <div class="magic-panel quote-panel">
+          <div class="quote-icon">🍄</div>
+          <p class="quote-text">
+            "Величие гриба не в том, как высоко он стоит, а в том, как глубоко он соединяет. 
+            Он не кричит о силе, а тихо превращает прах в жизнь, напоминая: истинное могущество 
+            растёт не к небу, а в тишине незримых связей."
+          </p>
+        </div>
       </div>
+
     </div>
   </div>
 
   <script>
-    // 🍄 Фоны (локальные картинки)
     const backgrounds = [
       "{{ url_for('static', filename='images/bg1.jpg') }}",
       "{{ url_for('static', filename='images/bg2.jpg') }}",
@@ -61,77 +120,142 @@
     const lengthSlider = document.getElementById('lengthSlider');
     const lengthValue = document.getElementById('lengthValue');
     const bgLayer = document.getElementById('bg-layer');
+    const strengthBar = document.getElementById('strengthBar');
+    const strengthText = document.getElementById('strengthText');
+    const qrImage = document.getElementById('qrImage');
+    const qrPlaceholder = document.getElementById('qrPlaceholder');
+    const historyList = document.getElementById('historyList');
 
-    // Смена фона
     function changeBackground() {
-      const url = backgrounds[currentBgIndex] + '?t=' + Date.now();
-      bgLayer.style.backgroundImage = `url('${url}')`;
+      bgLayer.style.backgroundImage = `url('${backgrounds[currentBgIndex]}?t=${Date.now()}')`;
       currentBgIndex = (currentBgIndex + 1) % backgrounds.length;
     }
 
-    // Обновление значения длины
-    lengthSlider.addEventListener('input', () => {
-      lengthValue.textContent = lengthSlider.value;
-    });
+    lengthSlider.addEventListener('input', () => lengthValue.textContent = lengthSlider.value);
 
-    // Генерация пароля
-    generateBtn.addEventListener('click', async () => {
-      generateBtn.disabled = true;
-      generateBtn.innerHTML = '<span class="btn-icon">⏳</span><span>Создаю...</span>';
-      
-      try {
-        const res = await fetch('/generate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ length: parseInt(lengthSlider.value) })
-        });
-        
-        if (!res.ok) throw new Error('Ошибка сервера');
-        
-        const data = await res.json();
-        passwordDisplay.textContent = data.password;
-        passwordDisplay.classList.add('pop');
-        setTimeout(() => passwordDisplay.classList.remove('pop'), 400);
-        
-        copyBtn.disabled = false;
-        changeBackground();
-      } catch (err) {
-        passwordDisplay.innerHTML = '<span class="error">⚠️ Ошибка генерации</span>';
-        console.error(err);
-      } finally {
-        generateBtn.disabled = false;
-        generateBtn.innerHTML = '<span class="btn-icon">✨</span><span>Создать пароль</span>';
-      }
-    });
+    function animatePassword(pwd) {
+      passwordDisplay.innerHTML = '';
+      pwd.split('').forEach((char, i) => {
+        const span = document.createElement('span');
+        span.textContent = char === ' ' ? '&nbsp;' : char;
+        span.style.animationDelay = `${i * 0.03}s`;
+        span.classList.add('char-growth');
+        passwordDisplay.appendChild(span);
+      });
+    }
 
-    // Копирование в буфер
-    copyBtn.addEventListener('click', async () => {
-      const password = passwordDisplay.textContent;
-      if (password && password !== 'Нажмите "Создать пароль"') {
-        try {
-          await navigator.clipboard.writeText(password);
-          copyBtn.innerHTML = '<span class="btn-icon">✅</span><span>Скопировано!</span>';
-          setTimeout(() => {
-            copyBtn.innerHTML = '<span class="btn-icon">📋</span><span>Копировать</span>';
-          }, 2000);
-        } catch (err) {
-          // Fallback для старых браузеров
-          const textarea = document.createElement('textarea');
-          textarea.value = password;
-          document.body.appendChild(textarea);
-          textarea.select();
-          document.execCommand('copy');
-          document.body.removeChild(textarea);
-          copyBtn.innerHTML = '<span class="btn-icon">✅</span><span>Скопировано!</span>';
-          setTimeout(() => {
-            copyBtn.innerHTML = '<span class="btn-icon">📋</span><span>Копировать</span>';
-          }, 2000);
+    function updateStrength(pwd) {
+      let score = 0;
+      if (pwd.length >= 8) score++;
+      if (pwd.length >= 12) score++;
+      if (/[A-Z]/.test(pwd)) score++;
+      if (/[0-9]/.test(pwd)) score++;
+      if (/[^A-Za-z0-9-]/.test(pwd)) score++;
+      if (pwd.includes('-')) score += 0.5;
+
+      const levels = [
+        { label: 'Слабый 🍄', color: '#ef4444', width: '20%' },
+        { label: 'Средний 🍄', color: '#fbbf24', width: '45%' },
+        { label: 'Надёжный 🟢', color: '#065f46', width: '75%' },
+        { label: 'Магический 🍄', color: '#a855f7', width: '100%' }
+      ];
+      const level = score < 2 ? levels[0] : score < 3 ? levels[1] : score < 4 ? levels[2] : levels[3];
+      strengthBar.style.width = level.width;
+      strengthBar.style.background = level.color;
+      strengthText.textContent = `Надёжность: ${level.label}`;
+      strengthText.style.color = level.color;
+    }
+
+    function generateQR(pwd) {
+      qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(pwd)}`;
+      qrImage.style.display = 'block';
+      qrPlaceholder.style.display = 'none';
+    }
+
+    function saveToHistory(pwd) {
+      let history = JSON.parse(localStorage.getItem('mushroom_pwd_history') || '[]');
+      history.unshift({ pwd, time: new Date().toLocaleTimeString() });
+      if (history.length > 5) history.pop();
+      localStorage.setItem('mushroom_pwd_history', JSON.stringify(history));
+      renderHistory();
+    }
+
+    function renderHistory() {
+      const history = JSON.parse(localStorage.getItem('mushroom_pwd_history') || '[]');
+      historyList.innerHTML = history.length === 0 
+        ? '<li class="history-empty">История пуста</li>' 
+        : history.map(item => `
+          <li class="history-item">
+            <span class="hist-pwd">${item.pwd}</span>
+            <span class="hist-time">${item.time}</span>
+            <button class="btn-hist-copy" data-pwd="${item.pwd}"></button>
+          </li>`).join('');
+    }
+
+    // Делегирование событий для безопасного копирования из истории
+    historyList.addEventListener('click', (e) => {
+      if (e.target.classList.contains('btn-hist-copy')) {
+        const pwd = e.target.dataset.pwd;
+        if (pwd) {
+          navigator.clipboard.writeText(pwd).then(() => {
+            e.target.textContent = '✅';
+            setTimeout(() => e.target.textContent = '', 1000);
+          });
         }
       }
     });
 
-    // Установить первый фон при загрузке
+    // Показ/скрытие опций произносимого режима
+    document.getElementById('pronounceableToggle').addEventListener('change', (e) => {
+      document.getElementById('pronounceableOptions').style.display = e.target.checked ? 'flex' : 'none';
+    });
+
+    generateBtn.addEventListener('click', async () => {
+      generateBtn.disabled = true;
+      generateBtn.innerHTML = '<span class="btn-icon">⏳</span><span>Растёт...</span>';
+      
+      const payload = {
+        length: parseInt(lengthSlider.value),
+        pronounceable: document.getElementById('pronounceableToggle').checked,
+        pronounceable_mode: document.querySelector('input[name="pronounceableMode"]:checked')?.value || 'wordlist',
+        use_upper: document.getElementById('chkUpper').checked,
+        use_lower: document.getElementById('chkLower').checked,
+        use_digits: document.getElementById('chkDigits').checked,
+        use_special: document.getElementById('chkSpecial').checked,
+        exclude_similar: document.getElementById('chkSimilar').checked
+      };
+
+      try {
+        const res = await fetch('/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        animatePassword(data.password);
+        updateStrength(data.password);
+        generateQR(data.password);
+        saveToHistory(data.password);
+        copyBtn.disabled = false;
+        changeBackground();
+      } catch (err) {
+        passwordDisplay.innerHTML = '<span class="error">⚠️ Ошибка связи с лесом</span>';
+      } finally {
+        generateBtn.disabled = false;
+        generateBtn.innerHTML = '<span class="btn-icon">🌱</span><span>Создать пароль</span>';
+      }
+    });
+
+    copyBtn.addEventListener('click', () => {
+      const pwd = Array.from(passwordDisplay.querySelectorAll('.char-growth')).map(s => s.textContent).join('');
+      if (pwd) navigator.clipboard.writeText(pwd).then(() => {
+        copyBtn.innerHTML = '<span class="btn-icon">✅</span><span>Скопировано!</span>';
+        setTimeout(() => copyBtn.innerHTML = '<span class="btn-icon"></span><span>Копировать</span>', 1500);
+      });
+    });
+
     changeBackground();
+    renderHistory();
   </script>
 </body>
 </html>
